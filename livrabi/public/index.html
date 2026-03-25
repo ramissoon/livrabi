@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="fr" data-lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Livrabi — Site de création d'histoires collaboratives. Écrivez ensemble, un paragraphe à la fois.">
+<title>Livrabi — Histoires à plusieurs mains</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --ink:#1a1209;--parchment:#f7f1e6;--cream:#fdf8f0;
+  --sepia:#c8a96e;--sepia-dark:#9a7840;--sepia-light:#e8d5b0;
+  --rust:#b85c38;--forest:#2d5a3d;
+  --muted:#7a6a55;--muted-light:#a89880;--white:#fff;
+  --shadow:rgba(26,18,9,.12);--shadow-deep:rgba(26,18,9,.28);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;}
+h1,h2,h3,h4{font-family:'Playfair Display',serif;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;background:rgba(247,241,230,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--sepia-light);box-shadow:0 2px 20px var(--shadow);}
+.logo{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:10px;cursor:pointer;}
+.logo-badge{width:32px;height:32px;background:var(--ink);border-radius:6px;display:grid;place-items:center;color:var(--parchment);font-size:.95rem;}
+.logo em{color:var(--sepia-dark);font-style:italic;}
+.nav-right{display:flex;align-items:center;gap:10px;}
+#notifBtn{position:relative;}
+.notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--rust);border-radius:50%;display:none;}
+.notif-dot.show{display:block;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;cursor:pointer;border:none;transition:all .2s ease;text-decoration:none;white-space:nowrap;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid transparent;}.btn-ghost:hover{background:var(--sepia-light);color:var(--ink);}
+.btn-outline{background:transparent;color:var(--ink);border:1.5px solid var(--ink);}.btn-outline:hover{background:var(--ink);color:var(--parchment);}
+.btn-primary{background:var(--ink);color:var(--parchment);border:1.5px solid var(--ink);}.btn-primary:hover{background:var(--sepia-dark);border-color:var(--sepia-dark);}
+.btn-sepia{background:var(--sepia);color:var(--ink);border:1.5px solid var(--sepia);}.btn-sepia:hover{background:var(--sepia-dark);color:#fff;border-color:var(--sepia-dark);}
+.btn-danger{background:var(--rust);color:#fff;border:1.5px solid var(--rust);}.btn-danger:hover{background:#9a4a2a;}
+.btn-sm{padding:6px 14px;font-size:.78rem;}
+.btn-lg{padding:13px 28px;font-size:1rem;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* HERO */
+.hero{margin-top:64px;padding:80px 48px 60px;display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center;max-width:1180px;margin-left:auto;margin-right:auto;}
+.hero-text{animation:fadeUp .7s ease both;}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;font-family:'DM Mono',monospace;font-size:.7rem;color:var(--sepia-dark);text-transform:uppercase;letter-spacing:.12em;margin-bottom:18px;padding:5px 12px;border:1px solid var(--sepia-light);border-radius:100px;}
+.hero-title{font-size:clamp(2.2rem,3.8vw,3.4rem);line-height:1.12;margin-bottom:20px;letter-spacing:-.03em;}
+.hero-title em{color:var(--sepia-dark);font-style:italic;}
+.hero-sub{font-size:1rem;color:var(--muted);line-height:1.75;margin-bottom:34px;max-width:420px;}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.hero-visual{animation:fadeUp .7s .12s ease both;}
+.card-stack{position:relative;height:360px;}
+.demo-card{position:absolute;background:var(--white);border:1px solid var(--sepia-light);border-radius:14px;padding:24px;box-shadow:0 6px 32px var(--shadow);transition:transform .3s;}
+.demo-card:nth-child(1){width:82%;top:0;left:9%;transform:rotate(-2.5deg);}
+.demo-card:nth-child(2){width:84%;top:36px;left:8%;transform:rotate(1.2deg);background:var(--parchment);z-index:2;}
+.demo-card:nth-child(3){width:80%;top:70px;left:10%;transform:rotate(-.5deg);z-index:3;}
+.demo-card:hover{transform:translateY(-4px) rotate(0)!important;z-index:10;}
+.dc-genre{font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--sepia-dark);margin-bottom:8px;}
+.dc-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:8px;line-height:1.3;}
+.dc-text{font-size:.8rem;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+
+/* RANKINGS BAR */
+.rankings-bar{background:var(--parchment);border-top:1px solid var(--sepia-light);border-bottom:1px solid var(--sepia-light);padding:16px 48px;display:flex;align-items:center;gap:0;overflow-x:auto;}
+.bar-label{font-family:'DM Mono',monospace;font-size:.67rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted-light);margin-right:24px;flex-shrink:0;}
+.tabs{display:flex;gap:6px;}
+.tab{padding:7px 16px;border-radius:100px;font-size:.82rem;font-weight:500;cursor:pointer;border:1.5px solid transparent;transition:all .2s;white-space:nowrap;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;}
+.tab.active{background:var(--ink);color:var(--parchment);border-color:var(--ink);}
+.tab:not(.active):hover{border-color:var(--sepia-light);color:var(--ink);}
+
+/* LAYOUT */
+.main-layout{max-width:1180px;margin:0 auto;padding:44px 48px;display:grid;grid-template-columns:1fr 296px;gap:44px;}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:26px;}
+.section-title{font-size:1.4rem;font-weight:700;letter-spacing:-.02em;}
+.count{font-family:'DM Mono',monospace;font-size:.73rem;color:var(--muted-light);}
+
+/* STORY GRID */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.tile{background:var(--white);border:1px solid var(--sepia-light);border-radius:13px;padding:22px;cursor:pointer;transition:all .22s ease;position:relative;overflow:hidden;}
+.tile::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 70%,var(--sepia-light));opacity:0;transition:opacity .3s;}
+.tile:hover{transform:translateY(-3px);box-shadow:0 10px 36px var(--shadow);border-color:var(--sepia);}
+.tile:hover::after{opacity:1;}
+.tile-emoji{width:100%;height:110px;border-radius:8px;background:linear-gradient(135deg,var(--sepia-light),var(--parchment));display:flex;align-items:center;justify-content:center;font-size:2.4rem;margin-bottom:14px;}
+.tile-genre{font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--sepia-dark);margin-bottom:7px;}
+.tile-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;line-height:1.3;margin-bottom:9px;}
+.tile-excerpt{font-size:.79rem;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:13px;}
+.tile-foot{display:flex;align-items:center;justify-content:space-between;font-size:.73rem;color:var(--muted-light);}
+.tile-stats{display:flex;gap:10px;}
+.badge-branch{display:inline-flex;align-items:center;gap:3px;font-size:.63rem;padding:2px 8px;background:var(--forest);color:#fff;border-radius:100px;font-weight:500;margin-bottom:7px;}
+
+/* EMPTY STATE */
+.empty{grid-column:1/-1;text-align:center;padding:70px 20px;}
+.empty-icon{font-size:3.5rem;margin-bottom:16px;}
+.empty h3{font-size:1.3rem;margin-bottom:8px;}
+.empty p{font-size:.88rem;color:var(--muted);margin-bottom:20px;}
+
+/* SIDEBAR */
+.sidebar{display:flex;flex-direction:column;gap:24px;}
+.widget{background:var(--white);border:1px solid var(--sepia-light);border-radius:13px;padding:20px;}
+.widget-title{font-size:.86rem;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.rank-list{display:flex;flex-direction:column;gap:11px;}
+.rank-item{display:flex;align-items:center;gap:11px;cursor:pointer;transition:opacity .2s;}.rank-item:hover{opacity:.7;}
+.rank-num{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--sepia-light);width:20px;flex-shrink:0;}
+.rank-num.top{color:var(--sepia-dark);}
+.rank-info{flex:1;min-width:0;}
+.rank-name{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rank-sub{font-size:.7rem;color:var(--muted-light);margin-top:2px;}
+.rank-score{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--sepia-dark);font-weight:500;}
+.activity-list{display:flex;flex-direction:column;gap:11px;}
+.act-item{display:flex;gap:9px;align-items:flex-start;}
+.act-dot{width:7px;height:7px;background:var(--sepia);border-radius:50%;flex-shrink:0;margin-top:5px;}
+.act-dot.b{background:var(--forest);}
+.act-text{font-size:.76rem;color:var(--muted);line-height:1.5;}
+.act-text strong{color:var(--ink);}
+.act-time{font-size:.67rem;color:var(--muted-light);margin-top:2px;}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(26,18,9,.52);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:36px 16px;overflow-y:auto;backdrop-filter:blur(4px);}
+.overlay.open{display:flex;}
+.modal{background:var(--cream);border-radius:18px;width:100%;max-width:760px;animation:mIn .28s ease;overflow:hidden;border:1px solid var(--sepia-light);box-shadow:0 28px 70px var(--shadow-deep);}
+.modal-sm{max-width:420px;}
+.modal-md{max-width:580px;}
+.mhead{padding:28px 32px 22px;background:var(--parchment);border-bottom:1px solid var(--sepia-light);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+.mbody{padding:28px 32px 32px;}
+.mfoot{padding:18px 32px 26px;display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--sepia-light);background:var(--parchment);}
+.mclose{background:none;border:1.5px solid var(--sepia-light);color:var(--muted);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;flex-shrink:0;display:grid;place-items:center;transition:all .2s;}
+.mclose:hover{background:var(--ink);color:var(--parchment);border-color:var(--ink);}
+
+/* STORY TIMELINE */
+.timeline{display:flex;flex-direction:column;}
+.p-node{position:relative;padding-left:30px;padding-bottom:24px;}
+.p-node::before{content:'';position:absolute;left:9px;top:22px;bottom:0;width:1px;background:var(--sepia-light);}
+.p-node:last-child::before{display:none;}
+.p-dot{position:absolute;left:5px;top:17px;width:8px;height:8px;background:var(--sepia);border-radius:50%;border:2px solid var(--cream);}
+.p-dot.first{background:var(--ink);width:10px;height:10px;left:4px;}
+.p-dot.branch{background:var(--forest);}
+.p-card{background:var(--white);border:1px solid var(--sepia-light);border-radius:11px;padding:16px 18px;}
+.p-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.p-author{font-size:.73rem;font-weight:600;color:var(--sepia-dark);}
+.p-time{font-size:.68rem;color:var(--muted-light);font-family:'DM Mono',monospace;}
+.p-text{font-size:.88rem;line-height:1.78;font-family:'Playfair Display',serif;}
+.branch-tag{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;color:var(--forest);font-weight:600;margin-bottom:6px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.04em;}
+
+/* FORMS */
+.fg{margin-bottom:17px;}
+label{display:block;font-size:.79rem;font-weight:600;color:var(--ink);margin-bottom:5px;}
+input[type=text],input[type=email],input[type=password],textarea,select{width:100%;padding:10px 13px;border:1.5px solid var(--sepia-light);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.87rem;background:var(--white);color:var(--ink);outline:none;transition:border-color .2s;}
+input:focus,textarea:focus,select:focus{border-color:var(--sepia-dark);}
+textarea{resize:vertical;min-height:110px;line-height:1.6;}
+.word-count{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted-light);text-align:right;margin-top:5px;}
+.word-count.over{color:var(--rust);}
+.lang-row{display:flex;gap:8px;margin-top:4px;}
+.lang-btn{flex:1;padding:9px;border:1.5px solid var(--sepia-light);border-radius:7px;background:var(--white);cursor:pointer;font-size:.83rem;font-family:'DM Sans',sans-serif;transition:all .2s;font-weight:500;color:var(--muted);}
+.lang-btn.sel{background:var(--ink);color:var(--parchment);border-color:var(--ink);}
+.img-opts{display:flex;gap:7px;margin-top:4px;}
+.img-opt{flex:1;padding:9px;border:1.5px solid var(--sepia-light);border-radius:7px;background:var(--white);cursor:pointer;font-size:.77rem;font-family:'DM Sans',sans-serif;transition:all .2s;font-weight:500;color:var(--muted);text-align:center;}
+.img-opt.sel{border-color:var(--ink);background:var(--ink);color:var(--parchment);}
+.form-link{font-size:.75rem;color:var(--sepia-dark);cursor:pointer;text-decoration:underline;}
+.form-toggle{text-align:center;margin-top:16px;font-size:.82rem;color:var(--muted);}
+.form-toggle a{color:var(--sepia-dark);font-weight:600;cursor:pointer;text-decoration:underline;}
+.alert{padding:11px 14px;border-radius:8px;font-size:.82rem;margin-bottom:14px;display:none;}
+.alert.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;}
+.alert.success{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;}
+.alert.show{display:block;}
+
+/* ADMIN PANEL */
+.admin-panel{display:none;}
+.admin-panel.open{display:block;}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--white);border:1px solid var(--sepia-light);border-radius:11px;padding:18px;text-align:center;}
+.stat-num{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--sepia-dark);}
+.stat-label{font-size:.75rem;color:var(--muted);margin-top:4px;}
+.admin-table{width:100%;border-collapse:collapse;font-size:.82rem;}
+.admin-table th{text-align:left;padding:10px 12px;background:var(--parchment);border-bottom:1px solid var(--sepia-light);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+.admin-table td{padding:10px 12px;border-bottom:1px solid var(--sepia-light)/50%;}
+.admin-table tr:last-child td{border-bottom:none;}
+.admin-tabs{display:flex;gap:6px;margin-bottom:20px;}
+
+/* NOTIF DROPDOWN */
+.notif-drop{position:fixed;top:68px;right:48px;width:320px;background:var(--white);border:1px solid var(--sepia-light);border-radius:13px;box-shadow:0 12px 40px var(--shadow-deep);z-index:150;display:none;overflow:hidden;}
+.notif-drop.open{display:block;}
+.notif-head{padding:14px 18px;background:var(--parchment);border-bottom:1px solid var(--sepia-light);display:flex;align-items:center;justify-content:space-between;font-size:.82rem;font-weight:600;}
+.notif-list{max-height:340px;overflow-y:auto;}
+.notif-item{padding:13px 18px;border-bottom:1px solid var(--sepia-light)/60%;font-size:.78rem;line-height:1.5;cursor:pointer;transition:background .15s;}
+.notif-item:hover{background:var(--cream);}
+.notif-item.unread{background:rgba(200,169,110,.08);}
+.notif-item:last-child{border-bottom:none;}
+.notif-time{font-size:.68rem;color:var(--muted-light);margin-top:3px;font-family:'DM Mono',monospace;}
+.notif-empty{padding:28px;text-align:center;color:var(--muted-light);font-size:.82rem;}
+
+/* LOADER */
+.loader{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--muted-light);gap:8px;font-size:.88rem;}
+.spin{width:20px;height:20px;border:2px solid var(--sepia-light);border-top-color:var(--sepia-dark);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;right:28px;z-index:500;background:var(--ink);color:var(--parchment);padding:13px 20px;border-radius:11px;font-size:.84rem;font-weight:500;box-shadow:0 8px 28px var(--shadow-deep);transform:translateY(70px);opacity:0;transition:all .32s cubic-bezier(.34,1.56,.64,1);max-width:300px;display:flex;align-items:center;gap:9px;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* FOOTER */
+footer{margin-top:70px;border-top:1px solid var(--sepia-light);padding:28px 48px;background:var(--parchment);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+footer p{font-size:.78rem;color:var(--muted-light);}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:none;}}
+@keyframes mIn{from{opacity:0;transform:translateY(18px) scale(.98);}to{opacity:1;transform:none;}}
+
+/* RESPONSIVE */
+@media(max-width:880px){
+  nav{padding:0 20px;}
+  .hero{grid-template-columns:1fr;padding:60px 20px 40px;gap:30px;margin-top:64px;}
+  .hero-visual{display:none;}
+  .rankings-bar{padding:12px 20px;}
+  .main-layout{grid-template-columns:1fr;padding:24px 20px;}
+  .grid{grid-template-columns:1fr;}
+  footer{padding:20px;}
+  .notif-drop{right:20px;left:20px;width:auto;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" onclick="goHome()">
+    <div class="logo-badge">📖</div>Livr<em>abi</em>
+  </a>
+  <div class="nav-right">
+    <button class="btn btn-ghost btn-sm" onclick="cycleLang()" id="langBtn">🌐 FR</button>
+    <span id="guestNav">
+      <button class="btn btn-outline btn-sm" onclick="openAuth('login')" data-i="nav_login">Connexion</button>
+      <button class="btn btn-primary btn-sm" onclick="openAuth('register')" data-i="nav_register">Inscription</button>
+    </span>
+    <span id="userNav" style="display:none;align-items:center;gap:8px;">
+      <button class="btn btn-ghost btn-sm" id="notifBtn" onclick="toggleNotif()">
+        🔔 <span class="notif-dot" id="notifDot"></span>
+      </button>
+      <span style="font-size:.84rem;font-weight:600;" id="navPseudo"></span>
+      <button class="btn btn-ghost btn-sm" id="adminNavBtn" onclick="openAdmin()" style="display:none;">⚙️ Admin</button>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Déconnexion</button>
+    </span>
+  </div>
+</nav>
+
+<!-- NOTIFICATION DROPDOWN -->
+<div class="notif-drop" id="notifDrop">
+  <div class="notif-head">
+  <span data-i="notif_head"></span>
+  <button class="btn btn-ghost btn-sm" onclick="markNotifsRead()" data-i="notif_mark_read"></button>
+</div>
+  <div class="notif-list" id="notifList">
+    <div class="notif-empty">Aucune notification</div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="heroSection">
+  <div class="hero-text">
+    <div class="eyebrow">✦ <span data-i="hero_eyebrow">Écriture collaborative</span></div>
+    <h1 class="hero-title" data-i="hero_title">Des histoires <em>à plusieurs mains</em>, une page à la fois.</h1>
+    <p class="hero-sub" data-i="hero_sub">Rejoignez une communauté de conteurs. Proposez un paragraphe, façonnez l'intrigue, créez des embranchements — chaque contribution compte.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary btn-lg" onclick="onCreateStory()" data-i="cta_create">✍️ Créer une histoire</button>
+      <button class="btn btn-ghost btn-lg" onclick="scrollToStories()" data-i="cta_explore">Parcourir →</button>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="card-stack">
+      <div class="demo-card"><div class="dc-genre">Fantasy · 4 contrib.</div><div class="dc-title">Le Dernier Gardien du Phare</div><div class="dc-text">La mer rugissait. Erik tenait sa lanterne d'une main tremblante, sachant que quelque chose remontait des profondeurs…</div></div>
+      <div class="demo-card"><div class="dc-genre">Thriller · 7 contrib.</div><div class="dc-title">La Lettre sans Adresse</div><div class="dc-text">Une enveloppe sans timbre, sans expéditeur. Juste son prénom, à l'encre bordeaux. Elle la retourna trois fois avant d'oser l'ouvrir…</div></div>
+      <div class="demo-card"><div class="dc-genre">Romance · 3 contrib.</div><div class="dc-title">Café des Impossibles</div><div class="dc-text">Chaque matin, il préparait son café avant qu'elle n'arrive. Personne ne lui avait encore demandé son nom.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- RANKINGS BAR -->
+<div class="rankings-bar" id="storiesTop">
+  <span class="bar-label" data-i="ranking_label">Trier par</span>
+  <div class="tabs">
+    <button class="tab active" data-sort="likes" onclick="setSort('likes',this)">🔥 <span data-i="sort_likes">Plus likées</span></button>
+    <button class="tab" data-sort="contributors" onclick="setSort('contributors',this)">👥 <span data-i="sort_contrib">Contributeurs</span></button>
+    <button class="tab" data-sort="followed" onclick="setSort('followed',this)">⭐ <span data-i="sort_followed">Plus suivies</span></button>
+    <button class="tab" data-sort="recent" onclick="setSort('recent',this)">🕐 <span data-i="sort_recent">Récentes</span></button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-layout">
+  <div>
+    <div class="section-head">
+      <h2 class="section-title" data-i="stories_title">Histoires en cours</h2>
+      <span class="count" id="storyCount"></span>
+    </div>
+    <div class="grid" id="storiesGrid"><div class="loader"><div class="spin"></div> Chargement…</div></div>
+  </div>
+  <aside class="sidebar">
+    <div class="widget" style="padding:16px;">
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="onCreateStory()">✍️ Créer une histoire</button>
+    </div>
+<div class="widget">
+  <div class="widget-title" data-i="sidebar_top"></div>
+  <div class="rank-list" id="sidebarRank"><div class="loader" style="padding:20px 0;"><div class="spin"></div></div></div>
+</div>
+<div class="widget">
+  <div class="widget-title" data-i="sidebar_activity"></div>
+  <div class="activity-list" id="activityList"><div class="loader" style="padding:20px 0;"><div class="spin"></div></div></div>
+</div>
+<div class="widget" style="background:var(--ink);border-color:var(--ink);" id="joinWidget">
+  <div class="widget-title" style="color:var(--parchment);" data-i="sidebar_join_title"></div>
+  <p style="font-size:.79rem;color:var(--muted-light);line-height:1.6;margin-bottom:13px;" data-i="sidebar_join_text"></p>
+  <button class="btn btn-sepia" style="width:100%;justify-content:center;" onclick="openAuth('register')" data-i="sidebar_join_btn"></button>
+</div>
+  </aside>
+</div>
+
+<footer>
+  <a class="logo" onclick="goHome()" style="font-size:1.2rem;">
+    <div class="logo-badge" style="width:26px;height:26px;font-size:.8rem;">📖</div>Livr<em>abi</em>
+  </a>
+  <p>© 2025 Livrabi — <span data-i="footer_tagline">Histoires à plusieurs mains.</span></p>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toastIcon"></span><span id="toastMsg"></span></div>
+
+<!-- ══ STORY MODAL ══ -->
+<div class="overlay" id="storyOverlay" onclick="closeOuter(event,'storyOverlay')">
+  <div class="modal">
+    <div class="mhead">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:.63rem;color:var(--sepia-dark);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px;" id="s_genre"></div>
+        <h2 style="font-size:1.45rem;letter-spacing:-.02em;" id="s_title"></h2>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:5px;" id="s_meta"></div>
+      </div>
+      <button class="mclose" onclick="closeM('storyOverlay')">✕</button>
+    </div>
+    <div class="mbody"><div class="timeline" id="storyTimeline"></div></div>
+    <div class="mfoot">
+      <button class="btn btn-primary" onclick="openContrib(false)" data-i="btn_continue">✍️ Proposer une suite</button>
+      <button class="btn btn-outline" onclick="openContrib(true)" style="color:var(--forest);border-color:var(--forest);">🌿 <span data-i="btn_branch">Créer un embranchement</span></button>
+      <button class="btn btn-ghost" id="followBtn" onclick="doFollow()">⭐ <span data-i="btn_follow">Suivre</span></button>
+      <button class="btn btn-ghost" id="likeBtn" onclick="doLike()">❤️ <span id="likesN">0</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AUTH MODAL ══ -->
+<div class="overlay" id="authOverlay" onclick="closeOuter(event,'authOverlay')">
+  <div class="modal modal-sm">
+    <div class="mhead">
+      <div>
+        <h3 id="authH" style="font-size:1.25rem;"></h3>
+        <p id="authSub" style="font-size:.78rem;color:var(--muted);margin-top:3px;"></p>
+      </div>
+      <button class="mclose" onclick="closeM('authOverlay')">✕</button>
+    </div>
+    <div class="mbody" id="authBody"></div>
+  </div>
+</div>
+
+<!-- ══ WRITE MODAL ══ -->
+<div class="overlay" id="writeOverlay" onclick="closeOuter(event,'writeOverlay')">
+  <div class="modal modal-md">
+    <div class="mhead">
+      <div>
+        <h3 id="writeH" style="font-size:1.2rem;"></h3>
+        <p id="writeSub" style="font-size:.78rem;color:var(--muted);margin-top:3px;"></p>
+      </div>
+      <button class="mclose" onclick="closeM('writeOverlay')">✕</button>
+    </div>
+    <div class="mbody" id="writeBody"></div>
+  </div>
+</div>
+
+<!-- ══ ADMIN MODAL ══ -->
+<div class="overlay" id="adminOverlay" onclick="closeOuter(event,'adminOverlay')">
+  <div class="modal" style="max-width:900px;">
+    <div class="mhead">
+      <h3 style="font-size:1.3rem;">⚙️ Tableau de bord administrateur</h3>
+      <button class="mclose" onclick="closeM('adminOverlay')">✕</button>
+    </div>
+    <div class="mbody" id="adminBody"><div class="loader"><div class="spin"></div></div></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  LIVRABI — Frontend JS
+// ════════════════════════════════════════════════════════
+
+const API = '/api';
+let TOKEN = localStorage.getItem('livrabi_token') || null;
+let ME    = JSON.parse(localStorage.getItem('livrabi_me') || 'null');
+let SORT  = 'likes';
+let CURRENT_STORY = null;
+
+// Add to i18n translations (T object):
+const T = {
+  fr: {
+    nav_login:'Connexion', nav_register:'Inscription',
+    hero_eyebrow:'Écriture collaborative',
+    hero_title:'Des histoires <em>à plusieurs mains</em>, une page à la fois.',
+    hero_sub:'Rejoignez une communauté de conteurs. Proposez un paragraphe, façonnez l\'intrigue, créez des embranchements — chaque contribution compte.',
+    cta_create:'✍️ Créer une histoire', cta_explore:'Parcourir →',
+    ranking_label:'Trier par', sort_likes:'Plus likées', sort_contrib:'Contributeurs', sort_followed:'Plus suivies', sort_recent:'Récentes',
+    stories_title:'Histoires en cours',
+    btn_continue:'✍️ Proposer une suite', btn_branch:'Créer un embranchement', btn_follow:'Suivre',
+    footer_tagline:'Histoires à plusieurs mains.',
+    empty_title:'Aucune histoire pour l\'instant',
+    empty_sub:'Soyez le premier à en créer une !',
+    login_title:'Connexion', login_sub:'Content de vous revoir !',
+    reg_title:'Créer un compte', reg_sub:'Rejoignez la communauté Livrabi',
+    sidebar_top:'🔥 Top cette semaine',
+    sidebar_activity:'⚡ Activité récente',
+    sidebar_join_title:'📬 Rejoindre la communauté',
+    sidebar_join_text:'Recevez une notification à chaque nouveau chapitre de vos histoires favorites.',
+    sidebar_join_btn:'Créer un compte gratuit',
+    logout_msg:'👋 Déconnecté(e).',
+    welcome_msg:'👋 Bienvenue, ',
+    story_created:'🚀 Histoire publiée !',
+    branch_created:'🌿 Embranchement publié !',
+    para_created:'✅ Paragraphe ajouté !',
+    account_created:'🎉 Compte créé ! Bienvenue sur Livrabi.',
+    notif_empty:'Aucune notification',
+    notif_head:'Notifications',
+    notif_mark_read:'Tout marquer lu',
+    notif_follow:'📬 Vous suivez cette histoire !',
+  },
+  en: {
+    nav_login:'Log in', nav_register:'Sign up',
+    hero_eyebrow:'Collaborative writing',
+    hero_title:'Stories written <em>together</em>, one paragraph at a time.',
+    hero_sub:'Join a community of storytellers. Propose a paragraph, shape the plot, create branches — every contribution matters.',
+    cta_create:'✍️ Create a story', cta_explore:'Browse →',
+    ranking_label:'Sort by', sort_likes:'Most liked', sort_contrib:'Contributors', sort_followed:'Most followed', sort_recent:'Recent',
+    stories_title:'Stories in progress',
+    btn_continue:'✍️ Propose a continuation', btn_branch:'Create a branch', btn_follow:'Follow',
+    footer_tagline:'Stories written together.',
+    empty_title:'No stories yet',
+    empty_sub:'Be the first to create one!',
+    login_title:'Log in', login_sub:'Good to see you again!',
+    reg_title:'Create an account', reg_sub:'Join the Livrabi community',
+    sidebar_top:'🔥 Top this week',
+    sidebar_activity:'⚡ Recent activity',
+    sidebar_join_title:'📬 Join the community',
+    sidebar_join_text:'Get notified for each new chapter of your favorite stories.',
+    sidebar_join_btn:'Create free account',
+    logout_msg:'👋 Logged out.',
+    welcome_msg:'👋 Welcome, ',
+    story_created:'🚀 Story published!',
+    branch_created:'🌿 Branch published!',
+    para_created:'✅ Paragraph added!',
+    account_created:'🎉 Account created! Welcome to Livrabi.',
+    notif_empty:'No notifications',
+    notif_head:'Notifications',
+    notif_mark_read:'Mark all as read',
+    notif_follow:'📬 You are following this story!',
+  }
+};
+
+let LANG = ME?.lang || localStorage.getItem('livrabi_lang') || 'fr';
+
+function t(k){ return T[LANG][k] || k; }
+
+function applyI18n(){
+  document.documentElement.lang = LANG;
+  document.getElementById('langBtn').textContent = '🌐 ' + LANG.toUpperCase();
+  document.querySelectorAll('[data-i]').forEach(el => {
+    const k = el.getAttribute('data-i');
+    if(T[LANG][k]) el.innerHTML = T[LANG][k];
+  });
+}
+
+function cycleLang(){
+  LANG = LANG === 'fr' ? 'en' : 'fr';
+  localStorage.setItem('livrabi_lang', LANG);
+  if(ME) patchMe({ lang: LANG });
+  applyI18n();
+}
+
+// ── API helpers ─────────────────────────────────────────
+async function api(method, path, body){
+  const opts = { method, headers: { 'Content-Type':'application/json' } };
+  if(TOKEN) opts.headers['Authorization'] = 'Bearer ' + TOKEN;
+  if(body) opts.body = JSON.stringify(body);
+  const r = await fetch(API + path, opts);
+  const data = await r.json();
+  if(!r.ok) throw new Error(data.error || 'Erreur');
+  return data;
+}
+
+// ── AUTH state ──────────────────────────────────────────
+function updateAuthUI(){
+  const loggedIn = !!ME;
+  document.getElementById('guestNav').style.display = loggedIn ? 'none' : 'inline-flex';
+  document.getElementById('userNav').style.display  = loggedIn ? 'inline-flex' : 'none';
+  if(loggedIn){
+    document.getElementById('navPseudo').textContent = '@' + ME.pseudo;
+    document.getElementById('joinWidget').style.display = 'none';
+    if(ME.role === 'admin') document.getElementById('adminNavBtn').style.display = 'inline-flex';
+  }
+  applyI18n();
+}
+
+function logout(){
+  TOKEN = null; ME = null;
+  localStorage.removeItem('livrabi_token');
+  localStorage.removeItem('livrabi_me');
+  updateAuthUI();
+  loadStories();
+  showToast(t('logout_msg'));
+}
+
+async function patchMe(data){
+  try { ME = await api('PATCH','/users/me',data); localStorage.setItem('livrabi_me', JSON.stringify(ME)); } catch{}
+}
+
+// ── LOAD STORIES ────────────────────────────────────────
+async function loadStories(){
+  const grid = document.getElementById('storiesGrid');
+  grid.innerHTML = '<div class="loader"><div class="spin"></div> Chargement…</div>';
+  try {
+    const stories = await api('GET', `/stories?sort=${SORT}&limit=20`);
+    document.getElementById('storyCount').textContent = stories.length + ' histoire' + (stories.length>1?'s':'');
+    if(!stories.length){
+      grid.innerHTML = `<div class="empty"><div class="empty-icon">📜</div><h3>${t('empty_title')}</h3><p>${t('empty_sub')}</p><button class="btn btn-primary" onclick="onCreateStory()">✍️ Créer la première</button></div>`;
+      return;
+    }
+    const genreEmoji = { fantasy:'🌊', thriller:'🌑', romance:'☕', 'science-fiction':'🚀', aventure:'🗺️', mystère:'🌙', horreur:'🕸️', historique:'⚔️' };
+    grid.innerHTML = stories.map(s => {
+      const emoji = genreEmoji[(s.genre||'').toLowerCase()] || '📖';
+      return `<div class="tile" onclick="openStory('${s.id}')">
+        <div class="tile-emoji">${emoji}</div>
+        <div class="tile-genre">${s.genre} · ${s.contrib_count} contrib.</div>
+        <div class="tile-title">${esc(s.title)}</div>
+        <div class="tile-foot">
+          <div class="tile-stats"><span>❤️ ${s.likes_count}</span><span>👥 ${s.contrib_count}</span><span>⭐ ${s.followers_count}</span></div>
+          <span style="font-size:.72rem;color:var(--muted);">@${esc(s.author_pseudo)}</span>
+        </div>
+      </div>`;
+    }).join('');
+    loadSidebarRank();
+  } catch(e) {
+    grid.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><h3>Erreur de chargement</h3><p>${e.message}</p><button class="btn btn-outline" onclick="loadStories()">Réessayer</button></div>`;
+  }
+}
+
+async function loadSidebarRank(){
+  try {
+    const top = await api('GET','/stories?sort=likes&limit=5');
+    const rankEl = document.getElementById('sidebarRank');
+    if(!top.length){ rankEl.innerHTML='<p style="font-size:.78rem;color:var(--muted-light);text-align:center;padding:10px 0;">Aucune histoire</p>'; return; }
+    rankEl.innerHTML = top.map((s,i)=>`<div class="rank-item" onclick="openStory('${s.id}')">
+      <span class="rank-num ${i<3?'top':''}">${i+1}</span>
+      <div class="rank-info"><div class="rank-name">${esc(s.title)}</div><div class="rank-sub">${s.genre}</div></div>
+      <span class="rank-score">❤️ ${s.likes_count}</span>
+    </div>`).join('');
+
+    // Activity placeholder (would be a real endpoint in prod)
+    document.getElementById('activityList').innerHTML = top.slice(0,3).map(s=>`
+      <div class="act-item"><div class="act-dot"></div>
+        <div><div class="act-text">Nouvelle contribution dans <strong>${esc(s.title)}</strong></div><div class="act-time">Récemment</div></div>
+      </div>`).join('');
+  } catch{}
+}
+
+function setSort(mode, btn){
+  SORT = mode;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  loadStories();
+}
+
+// ── OPEN STORY ──────────────────────────────────────────
+async function openStory(id){
+  document.getElementById('storyTimeline').innerHTML = '<div class="loader"><div class="spin"></div></div>';
+  openM('storyOverlay');
+  try {
+    const story = await api('GET', `/stories/${id}`);
+    CURRENT_STORY = story;
+    document.getElementById('s_genre').textContent = story.genre;
+    document.getElementById('s_title').textContent = story.title;
+    document.getElementById('s_meta').textContent = `Par @${story.author_pseudo} · ${story.contrib_count} contributeur${story.contrib_count>1?'s':''} · ❤️ ${story.likes_count}`;
+    document.getElementById('likesN').textContent = story.likes_count;
+
+    const tl = document.getElementById('storyTimeline');
+    if(!story.paragraphs?.length){
+      tl.innerHTML = '<p style="color:var(--muted-light);text-align:center;padding:20px;">Aucun paragraphe.</p>';
+      return;
+    }
+    tl.innerHTML = story.paragraphs.map(p=>`
+      <div class="p-node">
+        <div class="p-dot ${p.is_first?'first':''} ${p.is_branch?'branch':''}"></div>
+        <div class="p-card">
+          ${p.is_branch?'<div class="branch-tag">🌿 Embranchement</div>':''}
+          <div class="p-meta">
+            <span class="p-author">@${esc(p.author_pseudo)}</span>
+            <span class="p-time">${timeAgo(p.created_at)}</span>
+          </div>
+          <div class="p-text">${esc(p.content)}</div>
+        </div>
+      </div>`).join('');
+  } catch(e){ showToast('⚠️ '+e.message,'⚠️'); closeM('storyOverlay'); }
+}
+
+async function doLike(){
+  if(!ME) return openAuth('login');
+  try {
+    const r = await api('POST',`/stories/${CURRENT_STORY.id}/like`);
+    const n = document.getElementById('likesN');
+    n.textContent = r.liked ? parseInt(n.textContent)+1 : parseInt(n.textContent)-1;
+    document.getElementById('likeBtn').style.color = r.liked ? 'var(--rust)' : '';
+  } catch(e){ showToast('⚠️ '+e.message,'⚠️'); }
+}
+
+async function doFollow(){
+  if(!ME) return openAuth('login');
+  try {
+    const r = await api('POST',`/stories/${CURRENT_STORY.id}/follow`);
+    const btn = document.getElementById('followBtn');
+    btn.textContent = r.following ? '⭐ Suivi ✓' : `⭐ ${t('btn_follow')}`;
+    btn.style.color = r.following ? 'var(--sepia-dark)' : '';
+    if(r.following) showToast(t('notif_follow'),'📬');
+  } catch(e){ showToast('⚠️ '+e.message,'⚠️'); }
+}
+
+// ── WRITE ────────────────────────────────────────────────
+function onCreateStory(){ if(!ME) return openAuth('login'); openWrite(true); }
+
+function openContrib(isBranch){
+  if(!ME){ closeM('storyOverlay'); return openAuth('login'); }
+  openWrite(false, isBranch);
+}
+
+function openWrite(isNew, isBranch=false){
+  const h = isNew ? 'Créer une histoire' : (isBranch ? '🌿 Créer un embranchement' : '✍️ Proposer une suite');
+  const sub = isNew ? 'Donnez vie à votre récit' : (isBranch ? 'Une version alternative' : `Suite de : ${CURRENT_STORY?.title||''}`);
+  document.getElementById('writeH').textContent = h;
+  document.getElementById('writeSub').textContent = sub;
+
+  const lastPara = CURRENT_STORY?.paragraphs?.slice(-1)[0];
+
+  document.getElementById('writeBody').innerHTML = isNew ? `
+    <div class="fg"><label>Titre</label><input type="text" id="w_title" placeholder="Un titre accrocheur…"></div>
+    <div class="fg"><label>Genre</label>
+      <select id="w_genre">
+        <option value="Fantasy">🌊 Fantasy</option><option value="Thriller">🌑 Thriller</option>
+        <option value="Romance">☕ Romance</option><option value="Science-fiction">🚀 Science-fiction</option>
+        <option value="Aventure">🗺️ Aventure</option><option value="Mystère">🌙 Mystère</option>
+        <option value="Horreur">🕸️ Horreur</option><option value="Historique">⚔️ Historique</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Premier paragraphe <span style="color:var(--muted-light);font-weight:400;">(max 200 mots)</span></label>
+      <textarea id="w_content" placeholder="Il était une fois…" oninput="wCount(this,'wc',200)" style="min-height:130px;"></textarea>
+      <div class="word-count" id="wc">0 / 200 mots</div>
+    </div>
+    <div class="fg"><label>Illustration</label>
+      <div class="img-opts">
+        <div class="img-opt sel" onclick="selImg(this)">🚫 Aucune</div>
+        <div class="img-opt" onclick="selImg(this)">🤖 Générer IA</div>
+        <div class="img-opt" onclick="selImg(this)">🖼 Uploader</div>
+      </div>
+    </div>
+    <div class="alert error" id="w_err"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="submitNew()">🚀 Publier</button>
+  ` : `
+    ${lastPara ? `<div style="background:var(--parchment);border:1px solid var(--sepia-light);border-radius:9px;padding:13px 15px;margin-bottom:16px;"><div style="font-size:.7rem;color:var(--muted-light);margin-bottom:4px;">Dernier paragraphe</div><div style="font-size:.82rem;font-family:'Playfair Display',serif;line-height:1.6;">${esc(lastPara.content).substring(0,160)}…</div></div>` : ''}
+    <div class="fg">
+      <label>Votre paragraphe <span style="color:var(--muted-light);font-weight:400;">(max 150 mots)</span></label>
+      <textarea id="w_content" placeholder="${isBranch?'En fait, il décide de…':'La suite de l\'histoire…'}" oninput="wCount(this,'wc',150)" style="min-height:120px;"></textarea>
+      <div class="word-count" id="wc">0 / 150 mots</div>
+    </div>
+    <div class="fg"><label>Illustration</label>
+      <div class="img-opts">
+        <div class="img-opt sel" onclick="selImg(this)">🚫 Aucune</div>
+        <div class="img-opt" onclick="selImg(this)">🤖 Générer IA</div>
+        <div class="img-opt" onclick="selImg(this)">🖼 Uploader</div>
+      </div>
+    </div>
+    <div class="alert error" id="w_err"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="submitContrib(${isBranch})">✍️ Publier</button>
+  `;
+
+  if(!isNew) closeM('storyOverlay');
+  openM('writeOverlay');
+}
+
+function wCount(el, counterId, max){
+  const w = el.value.trim().split(/\s+/).filter(Boolean).length;
+  const el2 = document.getElementById(counterId);
+  el2.textContent = `${w} / ${max} mots`;
+  el2.classList.toggle('over', w > max);
+}
+function selImg(el){ el.closest('.img-opts').querySelectorAll('.img-opt').forEach(o=>o.classList.remove('sel')); el.classList.add('sel'); }
+
+async function submitNew(){
+  const title   = document.getElementById('w_title')?.value?.trim();
+  const genre   = document.getElementById('w_genre')?.value;
+  const content = document.getElementById('w_content')?.value?.trim();
+  const errEl   = document.getElementById('w_err');
+  errEl.classList.remove('show');
+  if(!title || !content){ errEl.textContent='Titre et contenu requis.'; errEl.classList.add('show'); return; }
+  const words = content.split(/\s+/).filter(Boolean).length;
+  if(words > 200){ errEl.textContent=`Limite 200 mots dépassée (${words}).`; errEl.classList.add('show'); return; }
+  try {
+    await api('POST','/stories',{ title, genre, content });
+    closeM('writeOverlay');
+    showToast(t('story_created'),'🚀');
+    loadStories();
+  } catch(e){ errEl.textContent=e.message; errEl.classList.add('show'); }
+}
+
+async function submitContrib(isBranch){
+  const content = document.getElementById('w_content')?.value?.trim();
+  const errEl   = document.getElementById('w_err');
+  errEl.classList.remove('show');
+  if(!content){ errEl.textContent='Contenu requis.'; errEl.classList.add('show'); return; }
+  const words = content.split(/\s+/).filter(Boolean).length;
+  if(words > 150){ errEl.textContent=`Limite 150 mots dépassée (${words}).`; errEl.classList.add('show'); return; }
+  try {
+    await api('POST','/paragraphs',{ story_id: CURRENT_STORY.id, content, is_branch: isBranch });
+    closeM('writeOverlay');
+    showToast(isBranch ? '🌿 Embranchement publié !' : '✅ Paragraphe ajouté !', isBranch ? '🌿' : '✅');
+    if(CURRENT_STORY) openStory(CURRENT_STORY.id);
+    loadStories();
+  } catch(e){ errEl.textContent=e.message; errEl.classList.add('show'); }
+}
+
+// ── AUTH ────────────────────────────────────────────────
+function openAuth(mode){ renderAuth(mode); openM('authOverlay'); }
+
+function renderAuth(mode){
+  const isLogin = mode === 'login';
+  document.getElementById('authH').textContent   = isLogin ? t('login_title') : t('reg_title');
+  document.getElementById('authSub').textContent = isLogin ? t('login_sub') : t('reg_sub');
+  document.getElementById('authBody').innerHTML  = isLogin ? `
+    <div class="alert error" id="a_err"></div>
+    <div class="fg"><label>Email</label><input type="email" id="a_email" placeholder="vous@exemple.com" autocomplete="email"></div>
+    <div class="fg">
+      <label>Mot de passe</label>
+      <input type="password" id="a_pw" placeholder="••••••••" autocomplete="current-password">
+      <a class="form-link" onclick="renderAuth('forgot')" style="display:block;text-align:right;margin-top:5px;">Mot de passe oublié ?</a>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="doLogin()">Se connecter</button>
+    <div class="form-toggle">Pas de compte ? <a onclick="renderAuth('register')">Créer un compte</a></div>
+  ` : mode === 'forgot' ? `
+    <div class="alert error" id="a_err"></div>
+    <div class="alert success" id="a_ok"></div>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px;line-height:1.6;">Entrez votre adresse email. Vous recevrez un lien de réinitialisation.</p>
+    <div class="fg"><label>Email</label><input type="email" id="a_email" placeholder="vous@exemple.com"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="doForgot()">Envoyer le lien</button>
+    <div class="form-toggle"><a onclick="renderAuth('login')">← Retour à la connexion</a></div>
+  ` : `
+    <div class="alert error" id="a_err"></div>
+    <div class="fg"><label>Email</label><input type="email" id="a_email" placeholder="vous@exemple.com" autocomplete="email"></div>
+    <div class="fg"><label>Pseudonyme</label><input type="text" id="a_pseudo" placeholder="VotrePseudo" autocomplete="username"></div>
+    <div class="fg"><label>Mot de passe <span style="color:var(--muted-light);font-weight:400;">(min 8 car.)</span></label><input type="password" id="a_pw" placeholder="••••••••" autocomplete="new-password"></div>
+    <div class="fg"><label>Confirmer le mot de passe</label><input type="password" id="a_pw2" placeholder="••••••••" autocomplete="new-password"></div>
+    <div class="fg"><label>Langue préférée</label>
+      <div class="lang-row">
+        <button class="lang-btn ${LANG==='fr'?'sel':''}" onclick="selLang(this,'fr')">🇫🇷 Français</button>
+        <button class="lang-btn ${LANG==='en'?'sel':''}" onclick="selLang(this,'en')">🇬🇧 English</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="doRegister()">Créer mon compte</button>
+    <div class="form-toggle">Déjà un compte ? <a onclick="renderAuth('login')">Se connecter</a></div>
+  `;
+}
+
+function selLang(btn, lang){ btn.closest('.lang-row').querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); }
+
+function errMsg(id, msg){ const el=document.getElementById(id); if(el){el.textContent=msg;el.classList.add('show');} }
+
+async function doLogin(){
+  const email = document.getElementById('a_email')?.value?.trim();
+  const pw    = document.getElementById('a_pw')?.value;
+  document.getElementById('a_err')?.classList.remove('show');
+  try {
+    const r = await api('POST','/auth/login',{ email, password: pw });
+    TOKEN = r.token; ME = r.user;
+    localStorage.setItem('livrabi_token', TOKEN);
+    localStorage.setItem('livrabi_me', JSON.stringify(ME));
+    LANG = ME.lang || LANG;
+    closeM('authOverlay');
+    updateAuthUI();
+    loadStories();
+    showToast(`${t('welcome_msg')}@${ME.pseudo} !`,'👋');
+    loadNotifs();
+  } catch(e){ errMsg('a_err', e.message); }
+}
+
+async function doRegister(){
+  const email  = document.getElementById('a_email')?.value?.trim();
+  const pseudo = document.getElementById('a_pseudo')?.value?.trim();
+  const pw     = document.getElementById('a_pw')?.value;
+  const pw2    = document.getElementById('a_pw2')?.value;
+  const lang   = document.querySelector('.lang-btn.sel')?.textContent?.includes('English') ? 'en' : 'fr';
+  document.getElementById('a_err')?.classList.remove('show');
+  if(pw !== pw2) return errMsg('a_err','Les mots de passe ne correspondent pas.');
+  try {
+    const r = await api('POST','/auth/register',{ email, pseudo, password: pw, lang });
+    TOKEN = r.token; ME = r.user;
+    localStorage.setItem('livrabi_token', TOKEN);
+    localStorage.setItem('livrabi_me', JSON.stringify(ME));
+    LANG = ME.lang || LANG;
+    closeM('authOverlay');
+    updateAuthUI();
+    loadStories();
+    showToast(t('account_created'),'🎉');
+  } catch(e){ errMsg('a_err', e.message); }
+}
+
+async function doForgot(){
+  const email = document.getElementById('a_email')?.value?.trim();
+  document.getElementById('a_err')?.classList.remove('show');
+  document.getElementById('a_ok')?.classList.remove('show');
+  try {
+    await api('POST','/auth/forgot-password',{ email });
+    const ok = document.getElementById('a_ok');
+    if(ok){ ok.textContent='Si ce compte existe, un email a été envoyé.'; ok.classList.add('show'); }
+  } catch(e){ errMsg('a_err', e.message); }
+}
+
+// ── NOTIFICATIONS ────────────────────────────────────────
+function toggleNotif(){
+  const drop = document.getElementById('notifDrop');
+  drop.classList.toggle('open');
+  if(drop.classList.contains('open')) loadNotifs();
+}
+
+async function loadNotifs(){
+  if(!ME) return;
+  try {
+    const notifs = await api('GET','/users/notifications');
+    const unread = notifs.filter(n=>!n.is_read).length;
+    document.getElementById('notifDot').classList.toggle('show', unread > 0);
+    const list = document.getElementById('notifList');
+    if(!notifs.length){ list.innerHTML=`<div class="notif-empty">${t('notif_empty')}</div>`; return; }
+    list.innerHTML = notifs.map(n=>`
+      <div class="notif-item ${n.is_read?'':'unread'}" onclick="onNotifClick('${n.story_id}')">
+        <div>${esc(n.message)}</div>
+        <div class="notif-time">${timeAgo(n.created_at)}</div>
+      </div>`).join('');
+  } catch{}
+}
+
+function onNotifClick(storyId){
+  document.getElementById('notifDrop').classList.remove('open');
+  if(storyId) openStory(storyId);
+}
+
+async function markNotifsRead(){
+  if(!ME) return;
+  try {
+    await api('PATCH','/users/notifications/read');
+    document.getElementById('notifDot').classList.remove('show');
+    document.querySelectorAll('.notif-item').forEach(el=>el.classList.remove('unread'));
+  } catch{}
+}
+
+// ── ADMIN ─────────────────────────────────────────────────
+async function openAdmin(){
+  openM('adminOverlay');
+  const body = document.getElementById('adminBody');
+  body.innerHTML = '<div class="loader"><div class="spin"></div> Chargement…</div>';
+  try {
+    const [stats, users, stories] = await Promise.all([
+      api('GET','/admin/stats'),
+      api('GET','/admin/users?limit=20'),
+      api('GET','/admin/stories?limit=20'),
+    ]);
+    body.innerHTML = `
+      <div class="admin-grid">
+        <div class="stat-card"><div class="stat-num">${stats.total_users}</div><div class="stat-label">👤 Utilisateurs</div></div>
+        <div class="stat-card"><div class="stat-num">${stats.total_stories}</div><div class="stat-label">📖 Histoires</div></div>
+        <div class="stat-card"><div class="stat-num">${stats.total_paragraphs}</div><div class="stat-label">✍️ Paragraphes</div></div>
+        <div class="stat-card"><div class="stat-num">${stats.total_likes}</div><div class="stat-label">❤️ Likes</div></div>
+      </div>
+      <div class="admin-tabs">
+        <button class="tab active" onclick="showAdminTab('users',this)">👤 Utilisateurs</button>
+        <button class="tab" onclick="showAdminTab('stories',this)">📖 Histoires</button>
+      </div>
+      <div id="adminTabContent">
+        ${renderUsersTable(users)}
+      </div>`;
+    body._users = users; body._stories = stories;
+  } catch(e){ body.innerHTML = `<p style="color:var(--rust);">Erreur : ${e.message}</p>`; }
+}
+
+function renderUsersTable(users){
+  return `<div style="overflow-x:auto;"><table class="admin-table">
+    <thead><tr><th>Pseudonyme</th><th>Email</th><th>Rôle</th><th>Histoires</th><th>Contributions</th><th>Actions</th></tr></thead>
+    <tbody>${users.map(u=>`<tr>
+      <td>@${esc(u.pseudo)}</td>
+      <td>${esc(u.email)}</td>
+      <td><span style="font-family:'DM Mono',monospace;font-size:.72rem;">${u.role}</span></td>
+      <td>${u.story_count}</td><td>${u.para_count}</td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick="toggleRole('${u.id}','${u.role}')">${u.role==='admin'?'→ user':'→ admin'}</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">🗑</button>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function renderStoriesTable(stories){
+  return `<div style="overflow-x:auto;"><table class="admin-table">
+    <thead><tr><th>Titre</th><th>Genre</th><th>Auteur</th><th>Statut</th><th>Likes</th><th>Actions</th></tr></thead>
+    <tbody>${stories.map(s=>`<tr>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(s.title)}</td>
+      <td>${esc(s.genre)}</td>
+      <td>@${esc(s.author_pseudo)}</td>
+      <td><span style="font-family:'DM Mono',monospace;font-size:.72rem;">${s.status}</span></td>
+      <td>❤️ ${s.likes_count}</td>
+      <td style="display:flex;gap:6px;">
+        ${s.status==='active'?`<button class="btn btn-outline btn-sm" onclick="setStoryStatus('${s.id}','closed')">Fermer</button>`:''}
+        <button class="btn btn-danger btn-sm" onclick="setStoryStatus('${s.id}','deleted')">🗑</button>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function showAdminTab(tab, btn){
+  document.querySelectorAll('.admin-tabs .tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  const body = document.getElementById('adminBody');
+  document.getElementById('adminTabContent').innerHTML = tab==='users' ? renderUsersTable(body._users) : renderStoriesTable(body._stories);
+}
+
+async function toggleRole(id, cur){
+  const newRole = cur==='admin' ? 'user' : 'admin';
+  if(!confirm(`Changer le rôle vers "${newRole}" ?`)) return;
+  try { await api('PATCH',`/admin/users/${id}/role`,{role:newRole}); openAdmin(); showToast('✅ Rôle mis à jour.','✅'); } catch(e){ showToast('⚠️ '+e.message,'⚠️'); }
+}
+async function deleteUser(id){
+  if(!confirm('Supprimer cet utilisateur ? Cette action est irréversible.')) return;
+  try { await api('DELETE',`/admin/users/${id}`); openAdmin(); showToast('🗑 Utilisateur supprimé.','🗑'); } catch(e){ showToast('⚠️ '+e.message,'⚠️'); }
+}
+async function setStoryStatus(id, status){
+  if(!confirm(`Mettre le statut "${status}" pour cette histoire ?`)) return;
+  try { await api('PATCH',`/admin/stories/${id}/status`,{status}); openAdmin(); loadStories(); showToast('✅ Statut mis à jour.','✅'); } catch(e){ showToast('⚠️ '+e.message,'⚠️'); }
+}
+
+// ── MODALS ───────────────────────────────────────────────
+function openM(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeM(id){ document.getElementById(id).classList.remove('open'); if(!document.querySelector('.overlay.open')) document.body.style.overflow=''; }
+function closeOuter(e,id){ if(e.target.id===id) closeM(id); }
+
+// ── UTILITIES ────────────────────────────────────────────
+let _toastT;
+function showToast(msg, icon='✅'){
+  document.getElementById('toastMsg').textContent = msg;
+  document.getElementById('toastIcon').textContent = icon;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  clearTimeout(_toastT);
+  _toastT = setTimeout(()=>t.classList.remove('show'), 3400);
+}
+
+function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+function timeAgo(dateStr){
+  if(!dateStr) return '';
+  const d = new Date(dateStr), now = new Date();
+  const diff = Math.floor((now-d)/1000);
+  
+  if(LANG === 'en'){
+    if(diff < 60) return 'Just now';
+    if(diff < 3600) return `${Math.floor(diff/60)} min ago`;
+    if(diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+    return `${Math.floor(diff/86400)}d ago`;
+  } else {
+    if(diff < 60) return 'À l\'instant';
+    if(diff < 3600) return `Il y a ${Math.floor(diff/60)} min`;
+    if(diff < 86400) return `Il y a ${Math.floor(diff/3600)}h`;
+    return `Il y a ${Math.floor(diff/86400)}j`;
+  }
+}
+
+function goHome(){ window.scrollTo({top:0,behavior:'smooth'}); }
+function scrollToStories(){ document.getElementById('storiesTop').scrollIntoView({behavior:'smooth'}); }
+
+// ── KEYBOARD ─────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(el=>closeM(el.id));
+});
+
+// Close notif on outside click
+document.addEventListener('click', e => {
+  const drop = document.getElementById('notifDrop');
+  if(drop.classList.contains('open') && !drop.contains(e.target) && e.target.id!=='notifBtn' && !document.getElementById('notifBtn').contains(e.target)){
+    drop.classList.remove('open');
+  }
+});
+
+// ── INIT ─────────────────────────────────────────────────
+updateAuthUI();
+loadStories();
+if(ME) loadNotifs();
+setInterval(()=>{ if(ME) loadNotifs(); }, 60000); // refresh notifs every minute
+</script>
+</body>
+</html>
