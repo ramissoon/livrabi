@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Livrabi — Écrire ensemble</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1209;
+    --parchment: #faf6ef;
+    --cream: #f5edd8;
+    --amber: #c8860a;
+    --amber-light: #e8a82a;
+    --amber-pale: #fdf3dc;
+    --rust: #a0401a;
+    --forest: #2d4a2a;
+    --mist: #8a7d6a;
+    --border: #d4c5a9;
+    --shadow: rgba(26,18,9,0.12);
+    --radius: 4px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Crimson Pro', Georgia, serif; background: var(--parchment); color: var(--ink); min-height: 100vh; font-size: 18px; line-height: 1.7; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
+
+  /* NAVBAR */
+  nav { position: sticky; top: 0; z-index: 100; background: var(--ink); border-bottom: 3px solid var(--amber); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 64px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+  .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 900; color: var(--amber-light); letter-spacing: -0.02em; cursor: pointer; user-select: none; text-shadow: 0 0 30px rgba(232,168,42,0.4); transition: text-shadow 0.3s; }
+  .nav-logo span { color: var(--parchment); font-style: italic; }
+  .nav-logo:hover { text-shadow: 0 0 40px rgba(232,168,42,0.7); }
+  .nav-actions { display: flex; align-items: center; gap: 1rem; }
+
+  /* BUTTONS */
+  .btn { font-family: 'Crimson Pro', serif; font-size: 0.85rem; font-weight: 600; border: none; cursor: pointer; padding: 0.5rem 1.4rem; border-radius: var(--radius); transition: all 0.2s; letter-spacing: 0.02em; text-transform: uppercase; }
+  .btn-amber { background: var(--amber); color: #fff; box-shadow: 0 2px 8px rgba(200,134,10,0.3); }
+  .btn-amber:hover { background: var(--amber-light); transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--parchment); border: 1px solid rgba(250,246,239,0.3); }
+  .btn-ghost:hover { background: rgba(250,246,239,0.1); border-color: var(--amber); color: var(--amber-light); }
+  .btn-ink { background: var(--ink); color: var(--parchment); border: 1px solid var(--border); }
+  .btn-ink:hover { background: #2d2218; }
+  .btn-danger { background: var(--rust); color: #fff; }
+  .btn-danger:hover { background: #c0501e; }
+  .btn-sm { padding: 0.3rem 0.9rem; font-size: 0.78rem; }
+  .btn-lg { padding: 0.8rem 2.2rem; font-size: 1rem; }
+  .btn-purple { background: #7c3aed; color: #fff; }
+  .btn-purple:hover { background: #6d28d9; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+  /* HOME */
+  main { position: relative; z-index: 1; }
+  .hero { text-align: center; padding: 5rem 2rem 3rem; }
+  .hero-ornament { font-size: 3rem; color: var(--amber); margin-bottom: 1rem; display: block; letter-spacing: 0.5em; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; color: var(--ink); line-height: 1.1; margin-bottom: 1rem; }
+  .hero h1 em { color: var(--amber); font-style: italic; }
+  .hero p { font-size: 1.2rem; color: var(--mist); max-width: 500px; margin: 0 auto 2rem; font-style: italic; }
+
+  /* FILTERS */
+  .filters { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; padding: 0 2rem 2rem; }
+  .filter-btn { font-family: 'Crimson Pro', serif; font-size: 0.9rem; padding: 0.45rem 1.2rem; border-radius: 50px; border: 1.5px solid var(--border); background: transparent; cursor: pointer; transition: all 0.2s; color: var(--mist); font-weight: 600; }
+  .filter-btn:hover, .filter-btn.active { background: var(--ink); color: var(--amber-light); border-color: var(--ink); }
+
+  /* GRID */
+  .stories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; padding: 0 2rem 4rem; max-width: 1200px; margin: 0 auto; }
+  .story-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; box-shadow: 0 2px 12px var(--shadow); transition: transform 0.25s, box-shadow 0.25s; cursor: pointer; position: relative; }
+  .story-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px var(--shadow); }
+  .story-card.closed::after { content: '📕 Fermée'; position: absolute; top: 0.5rem; right: 0.5rem; background: var(--rust); color: #fff; font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 50px; font-family: 'Crimson Pro', serif; font-weight: 600; }
+  .story-card-img { width: 100%; height: 180px; object-fit: cover; display: block; }
+  .story-card-img.placeholder { display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 900; background: linear-gradient(135deg, var(--ink) 0%, #2d2010 100%); color: var(--amber-light); height: 180px; }
+  .story-card-body { padding: 1.2rem; }
+  .story-card-cat { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--amber); font-weight: 600; margin-bottom: 0.4rem; }
+  .story-card-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--ink); line-height: 1.3; }
+  .story-card-preview { font-size: 0.9rem; color: var(--mist); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; font-style: italic; }
+  .story-card-meta { display: flex; gap: 1rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--border); font-size: 0.82rem; color: var(--mist); }
+
+  /* FOOTER */
+  .footer-word { text-align: center; padding: 2rem; border-top: 1px solid var(--border); color: var(--mist); font-style: italic; font-size: 0.95rem; margin-top: 2rem; }
+  .footer-word strong { color: var(--amber); font-size: 1.3rem; font-family: 'Playfair Display', serif; }
+
+  /* MODALS */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(26,18,9,0.6); z-index: 200; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(2px); }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--parchment); border: 1px solid var(--border); border-radius: 8px; padding: 2.5rem; max-width: 520px; width: 100%; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; animation: modalIn 0.25s ease; }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: none; } }
+  .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--mist); line-height: 1; }
+  .modal-close:hover { color: var(--ink); }
+  .modal h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; margin-bottom: 1.5rem; color: var(--ink); }
+  label { display: block; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--mist); margin-bottom: 0.4rem; }
+  input[type=text], input[type=password], select, textarea { width: 100%; padding: 0.7rem 1rem; border: 1.5px solid var(--border); border-radius: var(--radius); font-family: 'Crimson Pro', serif; font-size: 1rem; background: #fff; color: var(--ink); margin-bottom: 1.1rem; transition: border-color 0.2s; outline: none; }
+  input:focus, select:focus, textarea:focus { border-color: var(--amber); }
+  textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+  .msg-error { color: var(--rust); font-size: 0.9rem; margin-bottom: 0.8rem; font-style: italic; }
+  .msg-success { color: var(--forest); font-size: 0.9rem; margin-bottom: 0.8rem; font-style: italic; }
+  .link-btn { background: none; border: none; color: var(--amber); cursor: pointer; font-family: 'Crimson Pro', serif; font-size: 0.95rem; text-decoration: underline; padding: 0; }
+
+  /* STORY PAGE */
+  .story-header { max-width: 760px; margin: 3rem auto 2rem; padding: 0 2rem; text-align: center; }
+  .story-header-img { width: 100%; max-height: 320px; object-fit: cover; border-radius: 6px; margin-bottom: 1.5rem; box-shadow: 0 4px 20px var(--shadow); }
+  .story-header-cat { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--amber); font-weight: 700; margin-bottom: 0.6rem; }
+  .story-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; line-height: 1.15; margin-bottom: 0.8rem; }
+  .story-meta-line { font-size: 0.9rem; color: var(--mist); font-style: italic; display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .like-btn, .follow-btn { background: none; border: 1.5px solid var(--border); border-radius: 50px; padding: 0.35rem 1rem; cursor: pointer; font-family: 'Crimson Pro', serif; font-size: 0.9rem; color: var(--ink); transition: all 0.2s; display: flex; align-items: center; gap: 0.4rem; }
+  .like-btn:hover, .like-btn.liked { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
+  .follow-btn:hover, .follow-btn.following { background: #dbeafe; border-color: #93c5fd; color: #2563eb; }
+  .story-body { max-width: 680px; margin: 0 auto; padding: 0 2rem 5rem; }
+  .paragraph-block { margin-bottom: 2rem; position: relative; }
+  .paragraph-paper { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 2rem 2.5rem; box-shadow: 0 2px 10px var(--shadow); font-size: 1.08rem; line-height: 1.85; color: #2a1f12; }
+  .paragraph-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 0.8rem; font-size: 0.82rem; color: var(--mist); font-style: italic; }
+  .para-author { color: var(--amber); font-style: normal; font-weight: 600; }
+  .branch-tag { display: inline-block; background: var(--amber-pale); border: 1px solid var(--amber); color: var(--amber); font-size: 0.72rem; padding: 0.15rem 0.6rem; border-radius: 50px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+  .story-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; margin: 1.5rem 0; padding: 1.2rem; background: var(--cream); border-radius: 6px; border: 1px solid var(--border); }
+  .branch-indent { padding-left: 2rem; border-left: 3px solid var(--amber); margin-left: 1rem; }
+
+  /* ADMIN */
+  .admin-wrap { padding: 2rem; max-width: 1100px; margin: 0 auto; }
+  .admin-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+  .stat-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem; text-align: center; box-shadow: 0 2px 8px var(--shadow); }
+  .stat-card .num { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 900; color: var(--amber); line-height: 1; margin-bottom: 0.3rem; }
+  .stat-card .lbl { font-size: 0.82rem; color: var(--mist); text-transform: uppercase; letter-spacing: 0.06em; }
+  .tabs { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 1.5rem; }
+  .tab { padding: 0.6rem 1.4rem; border: none; background: none; cursor: pointer; font-family: 'Crimson Pro', serif; font-size: 1rem; color: var(--mist); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; font-weight: 600; }
+  .tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 8px var(--shadow); font-size: 0.9rem; }
+  th { background: var(--ink); color: var(--amber-light); padding: 0.7rem 1rem; text-align: left; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.07em; }
+  td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--amber-pale); }
+  .badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 50px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+  .badge-admin { background: #7c3aed; color: #fff; }
+  .badge-user { background: var(--cream); color: var(--mist); border: 1px solid var(--border); }
+  .td-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+  /* MISC */
+  .back-btn { display: inline-flex; align-items: center; gap: 0.4rem; background: none; border: none; color: var(--amber); font-family: 'Crimson Pro', serif; font-size: 1rem; cursor: pointer; padding: 1rem 2rem 0; font-weight: 600; transition: gap 0.2s; }
+  .back-btn:hover { gap: 0.7rem; }
+  #toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--ink); color: var(--parchment); padding: 0.8rem 1.4rem; border-radius: 6px; font-size: 0.9rem; border-left: 4px solid var(--amber); z-index: 9999; transform: translateY(100px); opacity: 0; transition: all 0.3s ease; max-width: 320px; font-family: 'Crimson Pro', serif; }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--mist); font-style: italic; }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+  .loader { text-align: center; padding: 3rem; color: var(--mist); font-style: italic; }
+  .hidden { display: none !important; }
+  .nav-user { display: flex; align-items: center; gap: 0.6rem; color: var(--parchment); font-size: 0.95rem; }
+  .nav-user .pseudo { color: var(--amber-light); font-weight: 600; font-style: italic; }
+
+  @media (max-width: 600px) {
+    .stories-grid { grid-template-columns: 1fr; padding: 0 1rem 2rem; }
+    .hero { padding: 3rem 1rem 2rem; }
+    .paragraph-paper { padding: 1.2rem 1.4rem; }
+    nav { padding: 0 1rem; }
+    .modal { padding: 1.5rem; }
+    .story-header, .story-body { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">Livr<span>abi</span></div>
+  <div class="nav-actions">
+    <button class="btn btn-amber btn-sm hidden" id="btn-create-nav" onclick="openModal('modal-create')">✍️ Créer une histoire</button>
+    <button class="btn btn-purple btn-sm hidden" id="btn-admin-nav" onclick="showPage('admin')">⚙️ Admin</button>
+    <div id="nav-user-area">
+      <div style="display:flex;gap:0.6rem">
+        <button class="btn btn-ghost btn-sm" onclick="openModal('modal-login')">Connexion</button>
+        <button class="btn btn-amber btn-sm" onclick="openModal('modal-register')">Inscription</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HOME -->
+<main id="page-home">
+  <div class="hero">
+    <span class="hero-ornament">✦ ✦ ✦</span>
+    <h1>Écrire ensemble,<br><em>une histoire à la fois</em></h1>
+    <p>Rejoignez des milliers d'auteurs et construisez des récits collectifs, paragraphe par paragraphe.</p>
+    <button class="btn btn-amber btn-lg" onclick="openModal('modal-create')">✍️ Créer une histoire</button>
+  </div>
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter(this,'')">📚 Toutes</button>
+    <button class="filter-btn" onclick="setFilter(this,'likes')">🔥 Plus likées</button>
+    <button class="filter-btn" onclick="setFilter(this,'contributors')">👥 Plus de contributeurs</button>
+    <button class="filter-btn" onclick="setFilter(this,'followers')">⚡ Plus suivies</button>
+  </div>
+  <div class="stories-grid" id="stories-grid"><div class="loader">Chargement des histoires…</div></div>
+  <div class="footer-word hidden" id="footer-word">Votre mot préféré : <strong id="footer-word-value"></strong></div>
+</main>
+
+<!-- PAGE STORY -->
+<main id="page-story" class="hidden">
+  <button class="back-btn" onclick="showPage('home')">← Retour</button>
+  <div class="story-header">
+    <div id="story-img-wrap"></div>
+    <div class="story-header-cat" id="story-cat"></div>
+    <div class="story-title" id="story-title-h"></div>
+    <div class="story-meta-line" id="story-meta-line"></div>
+    <div style="display:flex;gap:0.6rem;justify-content:center;margin-bottom:1rem">
+      <button class="like-btn" id="like-btn" onclick="toggleLike()">♥ <span id="like-count">0</span></button>
+      <button class="follow-btn" id="follow-btn" onclick="toggleFollow()">🔔 <span id="follow-count">0</span></button>
+    </div>
+    <div id="story-closed-banner" class="hidden" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:6px;padding:0.6rem 1rem;color:#dc2626;font-size:0.9rem;font-style:italic">📕 Cette histoire est fermée — plus de contributions possibles.</div>
+  </div>
+  <div class="story-body" id="story-body"></div>
+</main>
+
+<!-- PAGE ADMIN -->
+<main id="page-admin" class="hidden">
+  <div class="admin-wrap">
+    <div class="admin-title">⚙️ Tableau de bord</div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="num" id="stat-users">…</div><div class="lbl">Utilisateurs</div></div>
+      <div class="stat-card"><div class="num" id="stat-stories">…</div><div class="lbl">Histoires actives</div></div>
+      <div class="stat-card"><div class="num" id="stat-paragraphs">…</div><div class="lbl">Paragraphes</div></div>
+      <div class="stat-card"><div class="num" id="stat-likes">…</div><div class="lbl">Likes total</div></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('users',this)">👤 Utilisateurs</button>
+      <button class="tab" onclick="switchTab('stories',this)">📖 Histoires</button>
+    </div>
+    <div id="admin-tab-users">
+      <table><thead><tr><th>Pseudo</th><th>Rôle</th><th>Histoires</th><th>Actions</th></tr></thead>
+      <tbody id="admin-users-tbody"><tr><td colspan="4" class="loader">Chargement…</td></tr></tbody></table>
+    </div>
+    <div id="admin-tab-stories" class="hidden">
+      <table><thead><tr><th>Titre</th><th>Catégorie</th><th>Statut</th><th>Likes</th><th>Actions</th></tr></thead>
+      <tbody id="admin-stories-tbody"><tr><td colspan="5" class="loader">Chargement…</td></tr></tbody></table>
+    </div>
+  </div>
+</main>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-register">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-register')">✕</button>
+    <h2>📖 Rejoindre Livrabi</h2>
+    <div id="reg-error" class="msg-error hidden"></div>
+    <label>Pseudonyme</label><input type="text" id="reg-pseudo" placeholder="Votre nom de plume…">
+    <label>Mot de passe</label><input type="password" id="reg-pw" placeholder="••••••••">
+    <label>Votre mot préféré <span style="font-size:0.8em;color:var(--mist)">(récupération de mot de passe)</span></label>
+    <input type="text" id="reg-fav" placeholder="Ex: ephémère, lumière…">
+    <button class="btn btn-amber" style="width:100%" id="reg-btn" onclick="doRegister()">Créer mon compte</button>
+    <div style="text-align:center;margin-top:1rem;font-size:0.9rem;color:var(--mist)">Déjà un compte ? <button class="link-btn" onclick="closeModal('modal-register');openModal('modal-login')">Se connecter</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-login">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-login')">✕</button>
+    <h2>🔑 Connexion</h2>
+    <div id="login-error" class="msg-error hidden"></div>
+    <label>Pseudonyme</label><input type="text" id="login-pseudo" placeholder="Votre pseudonyme…">
+    <label>Mot de passe</label><input type="password" id="login-pw" placeholder="••••••••">
+    <button class="btn btn-amber" style="width:100%;margin-bottom:0.8rem" id="login-btn" onclick="doLogin()">Se connecter</button>
+    <div style="text-align:center"><button class="link-btn" onclick="closeModal('modal-login');openModal('modal-forgot')">Mot de passe oublié ?</button></div>
+    <div style="text-align:center;margin-top:0.8rem;font-size:0.9rem;color:var(--mist)">Pas de compte ? <button class="link-btn" onclick="closeModal('modal-login');openModal('modal-register')">S'inscrire</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-forgot">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-forgot')">✕</button>
+    <h2>🔍 Récupérer mon accès</h2>
+    <div id="forgot-error" class="msg-error hidden"></div>
+    <div id="forgot-success" class="msg-success hidden"></div>
+    <div id="forgot-form-1">
+      <label>Pseudonyme</label><input type="text" id="forgot-pseudo" placeholder="Votre pseudonyme…">
+      <label>Votre mot préféré</label><input type="text" id="forgot-fav" placeholder="Votre mot préféré…">
+      <button class="btn btn-amber" style="width:100%" onclick="doForgot()">Vérifier</button>
+    </div>
+    <div id="forgot-form-2" class="hidden">
+      <label>Nouveau mot de passe</label><input type="password" id="forgot-newpw" placeholder="Nouveau mot de passe…">
+      <button class="btn btn-amber" style="width:100%" onclick="doResetPw()">Enregistrer le nouveau mot de passe</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-create">
+  <div class="modal" style="max-width:600px">
+    <button class="modal-close" onclick="closeModal('modal-create')">✕</button>
+    <h2>✍️ Nouvelle histoire</h2>
+    <div id="create-error" class="msg-error hidden"></div>
+    <label>Titre</label><input type="text" id="create-title" placeholder="Un titre mémorable…" maxlength="120">
+    <label>Catégorie</label>
+    <select id="create-cat">
+      <option value="">— Choisir —</option>
+      <option>Fantasy</option><option>Thriller</option><option>Romance</option>
+      <option>Science-fiction</option><option>Aventure</option><option>Mystère</option>
+      <option>Horreur</option><option>Historique</option><option>Poésie</option><option>Autre</option>
+    </select>
+    <label>Premier paragraphe</label><textarea id="create-para" placeholder="Il était une fois…" rows="5"></textarea>
+    <label>Image (URL, optionnel)</label><input type="text" id="create-img" placeholder="https://…">
+    <button class="btn btn-amber" style="width:100%" id="create-btn" onclick="doCreateStory()">Publier l'histoire</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-suite">
+  <div class="modal" style="max-width:600px">
+    <button class="modal-close" onclick="closeModal('modal-suite')">✕</button>
+    <h2>📝 Proposer une suite</h2>
+    <p style="color:var(--mist);font-style:italic;margin-bottom:1.2rem;font-size:0.95rem">Votre paragraphe s'ajoutera à la suite de l'histoire.</p>
+    <div id="suite-error" class="msg-error hidden"></div>
+    <label>Votre paragraphe</label><textarea id="suite-para" placeholder="La suite…" rows="6"></textarea>
+    <button class="btn btn-amber" style="width:100%" id="suite-btn" onclick="doAddSuite()">Publier ma suite</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-branch">
+  <div class="modal" style="max-width:600px">
+    <button class="modal-close" onclick="closeModal('modal-branch')">✕</button>
+    <h2>🌿 Créer un embranchement</h2>
+    <p style="color:var(--mist);font-style:italic;margin-bottom:1.2rem;font-size:0.95rem">Une version alternative à partir de l'avant-dernier paragraphe.</p>
+    <div id="branch-error" class="msg-error hidden"></div>
+    <label>Paragraphe alternatif</label><textarea id="branch-para" placeholder="Une autre version…" rows="6"></textarea>
+    <button class="btn btn-amber" style="width:100%" id="branch-btn" onclick="doAddBranch()">Créer l'embranchement</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════
+//  API HELPER
+// ════════════════════════════════
+async function api(method, path, body) {
+  const opts = { method, credentials: 'include', headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch('/api' + path, opts);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || 'Erreur réseau');
+  return data;
+}
+
+// ════════════════════════════════
+//  STATE
+// ════════════════════════════════
+let currentUser    = null;
+let currentStoryId = null;
+let currentSort    = '';
+
+// ════════════════════════════════
+//  PAGES
+// ════════════════════════════════
+function showPage(page) {
+  ['home','story','admin'].forEach(p => {
+    const el = document.getElementById('page-'+p);
+    el.classList.toggle('hidden', p !== page);
+  });
+  if (page === 'home')  loadStories();
+  if (page === 'admin') loadAdmin();
+}
+
+// ════════════════════════════════
+//  MODALS
+// ════════════════════════════════
+function openModal(id) {
+  if ((id === 'modal-create' || id === 'modal-suite' || id === 'modal-branch') && !currentUser) {
+    toast('Connectez-vous pour contribuer 📖');
+    openModal('modal-login');
+    return;
+  }
+  clearErrors();
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function clearErrors() {
+  document.querySelectorAll('.msg-error,.msg-success').forEach(el => { el.classList.add('hidden'); el.textContent = ''; });
+}
+function showError(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.classList.remove('hidden'); }
+function showSuccess(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.classList.remove('hidden'); }
+
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// ════════════════════════════════
+//  NAVBAR
+// ════════════════════════════════
+function updateNavbar() {
+  const area     = document.getElementById('nav-user-area');
+  const btnCreate = document.getElementById('btn-create-nav');
+  const btnAdmin  = document.getElementById('btn-admin-nav');
+
+  if (currentUser) {
+    area.innerHTML = `<div class="nav-user">Bonjour, <span class="pseudo">${esc(currentUser.pseudo)}</span>&nbsp;<button class="btn btn-ghost btn-sm" onclick="doLogout()">Quitter</button></div>`;
+    btnCreate.classList.remove('hidden');
+    btnAdmin.classList.toggle('hidden', !currentUser.isAdmin);
+    // Footer word
+    document.getElementById('footer-word-value').textContent = currentUser.fav;
+    document.getElementById('footer-word').classList.remove('hidden');
+  } else {
+    area.innerHTML = `<div style="display:flex;gap:0.6rem"><button class="btn btn-ghost btn-sm" onclick="openModal('modal-login')">Connexion</button><button class="btn btn-amber btn-sm" onclick="openModal('modal-register')">Inscription</button></div>`;
+    btnCreate.classList.add('hidden');
+    btnAdmin.classList.add('hidden');
+    document.getElementById('footer-word').classList.add('hidden');
+  }
+}
+
+// ════════════════════════════════
+//  AUTH
+// ════════════════════════════════
+async function doRegister() {
+  const pseudo = v('reg-pseudo'), pw = v('reg-pw'), fav = v('reg-fav');
+  if (!pseudo || !pw || !fav) { showError('reg-error', 'Tous les champs sont requis.'); return; }
+  setLoading('reg-btn', true);
+  try {
+    currentUser = await api('POST', '/auth/register', { pseudo, pw, fav });
+    closeModal('modal-register');
+    updateNavbar();
+    toast(`Bienvenue, ${currentUser.pseudo} ! 🎉`);
+    showPage('home');
+  } catch(e) { showError('reg-error', e.message); }
+  setLoading('reg-btn', false);
+}
+
+async function doLogin() {
+  const pseudo = v('login-pseudo'), pw = v('login-pw');
+  if (!pseudo || !pw) { showError('login-error', 'Champs requis.'); return; }
+  setLoading('login-btn', true);
+  try {
+    currentUser = await api('POST', '/auth/login', { pseudo, pw });
+    closeModal('modal-login');
+    updateNavbar();
+    toast(`Bon retour, ${currentUser.pseudo} ! 📚`);
+    showPage('home');
+  } catch(e) { showError('login-error', e.message); }
+  setLoading('login-btn', false);
+}
+
+async function doLogout() {
+  await api('POST', '/auth/logout');
+  currentUser = null;
+  updateNavbar();
+  showPage('home');
+  toast('Déconnecté. À bientôt ! 👋');
+}
+
+async function doForgot() {
+  const pseudo = v('forgot-pseudo'), fav = v('forgot-fav');
+  try {
+    const r = await api('POST', '/auth/forgot', { pseudo, fav });
+    if (r.canReset) {
+      showSuccess('forgot-success', 'Vérification réussie. Choisissez un nouveau mot de passe.');
+      document.getElementById('forgot-form-2').classList.remove('hidden');
+    }
+  } catch(e) { showError('forgot-error', e.message); }
+}
+
+async function doResetPw() {
+  const pseudo = v('forgot-pseudo'), fav = v('forgot-fav'), newPw = v('forgot-newpw');
+  if (!newPw) { showError('forgot-error', 'Entrez un nouveau mot de passe.'); return; }
+  try {
+    await api('POST', '/auth/reset-password', { pseudo, fav, newPw });
+    showSuccess('forgot-success', 'Mot de passe modifié ! Vous pouvez vous connecter.');
+    document.getElementById('forgot-form-2').classList.add('hidden');
+    setTimeout(() => { closeModal('modal-forgot'); openModal('modal-login'); }, 1500);
+  } catch(e) { showError('forgot-error', e.message); }
+}
+
+// ════════════════════════════════
+//  STORIES LIST
+// ════════════════════════════════
+async function loadStories() {
+  const grid = document.getElementById('stories-grid');
+  grid.innerHTML = '<div class="loader">Chargement des histoires…</div>';
+  try {
+    const stories = await api('GET', '/stories' + (currentSort ? '?sort=' + currentSort : ''));
+    renderGrid(stories);
+  } catch(e) {
+    grid.innerHTML = `<div class="empty-state"><span class="icon">⚠️</span>${e.message}</div>`;
+  }
+}
+
+function renderGrid(stories) {
+  const grid = document.getElementById('stories-grid');
+  if (!stories.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><span class="icon">📚</span>Aucune histoire pour l\'instant.<br>Soyez le premier à écrire !</div>';
+    return;
+  }
+  grid.innerHTML = stories.map(s => {
+    const first = s.paragraphs[0] || {};
+    const contributors = new Set(s.paragraphs.map(p => p.author)).size;
+    const img = s.img
+      ? `<img class="story-card-img" src="${esc(s.img)}" onerror="this.style.display='none'" alt="">`
+      : `<div class="story-card-img placeholder">Livrabi</div>`;
+    return `<div class="story-card${s.closed?' closed':''}" onclick="openStory('${s._id}')">
+      ${img}
+      <div class="story-card-body">
+        <div class="story-card-cat">${esc(s.cat)}</div>
+        <div class="story-card-title">${esc(s.title)}</div>
+        <div class="story-card-preview">${esc(first.text||'')}</div>
+        <div class="story-card-meta">
+          <span>♥ ${s.likes.length}</span>
+          <span>👥 ${contributors}</span>
+          <span>⚡ ${s.followers.length}</span>
+          <span>📄 ${s.paragraphs.length}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setFilter(btn, sort) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentSort = sort;
+  loadStories();
+}
+
+// ════════════════════════════════
+//  STORY PAGE
+// ════════════════════════════════
+async function openStory(id) {
+  currentStoryId = id;
+  showPage('story');
+  document.getElementById('story-body').innerHTML = '<div class="loader">Chargement…</div>';
+  try {
+    const story = await api('GET', '/stories/' + id);
+    renderStory(story);
+  } catch(e) {
+    document.getElementById('story-body').innerHTML = `<div class="empty-state">⚠️ ${e.message}</div>`;
+  }
+}
+
+function renderStory(story) {
+  // Image
+  const imgWrap = document.getElementById('story-img-wrap');
+  imgWrap.innerHTML = story.img
+    ? `<img class="story-header-img" src="${esc(story.img)}" onerror="this.style.display='none'" alt="">`
+    : `<div class="story-card-img placeholder" style="max-height:220px;border-radius:6px;margin-bottom:1.5rem">Livrabi</div>`;
+
+  document.getElementById('story-cat').textContent = story.cat;
+  document.getElementById('story-title-h').textContent = story.title;
+
+  const contributors = new Set(story.paragraphs.map(p => p.author)).size;
+  document.getElementById('story-meta-line').innerHTML =
+    `<span>Par <b>${esc(story.author)}</b></span> · <span>${story.paragraphs.length} paragraphe${story.paragraphs.length>1?'s':''}</span> · <span>${contributors} contributeur${contributors>1?'s':''}</span>`;
+
+  // Like/Follow
+  const liked     = currentUser && story.likes.includes(currentUser.pseudo);
+  const following = currentUser && story.followers.includes(currentUser.pseudo);
+  document.getElementById('like-btn').className   = 'like-btn'   + (liked     ? ' liked'     : '');
+  document.getElementById('follow-btn').className = 'follow-btn' + (following ? ' following' : '');
+  document.getElementById('like-btn').innerHTML   = `♥ <span id="like-count">${story.likes.length}</span>`;
+  document.getElementById('follow-btn').innerHTML = `${following?'🔕':'🔔'} <span id="follow-count">${story.followers.length}</span>`;
+
+  document.getElementById('story-closed-banner').classList.toggle('hidden', !story.closed);
+
+  // Body
+  const mainChain = story.paragraphs.filter(p => !p.isBranch);
+  const branches  = story.paragraphs.filter(p => p.isBranch);
+
+  let html = '';
+  if (!story.closed && currentUser) {
+    html += `<div class="story-actions">
+      <button class="btn btn-amber" onclick="openModal('modal-suite')">📝 Proposer une suite</button>
+      ${mainChain.length > 1 ? `<button class="btn btn-ink" onclick="openModal('modal-branch')">🌿 Créer un embranchement</button>` : ''}
+    </div>`;
+  }
+
+  mainChain.forEach((para, i) => {
+    html += renderPara(para, false);
+    const myBranches = branches.filter(b => b.parentId === para._id);
+    if (myBranches.length) {
+      html += `<div class="branch-indent">${myBranches.map(b => renderPara(b, true)).join('')}</div>`;
+    }
+    if (i < mainChain.length - 1) html += `<div style="text-align:center;color:var(--border);font-size:1.2rem;margin:0.3rem 0">⋮</div>`;
+  });
+
+  document.getElementById('story-body').innerHTML = html || '<div class="empty-state"><span class="icon">📃</span>Aucun paragraphe.</div>';
+}
+
+function renderPara(para, isBranch) {
+  const d = new Date(para.createdAt).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+  return `<div class="paragraph-block">
+    ${isBranch ? '<span class="branch-tag">🌿 Embranchement</span>' : ''}
+    <div class="paragraph-paper"><p>${esc(para.text)}</p></div>
+    <div class="paragraph-meta"><span>Écrit par <span class="para-author">${esc(para.author)}</span></span><span>${d}</span></div>
+  </div>`;
+}
+
+// ════════════════════════════════
+//  CONTRIBUTIONS
+// ════════════════════════════════
+async function doCreateStory() {
+  const title = v('create-title'), cat = v('create-cat'), firstParagraph = v('create-para'), img = v('create-img');
+  if (!title || !cat || !firstParagraph) { showError('create-error','Titre, catégorie et paragraphe requis.'); return; }
+  setLoading('create-btn', true);
+  try {
+    const story = await api('POST', '/stories', { title, cat, firstParagraph, img });
+    closeModal('modal-create');
+    ['create-title','create-cat','create-para','create-img'].forEach(id => document.getElementById(id).value = '');
+    toast('Histoire créée ! 🎉');
+    openStory(story._id);
+  } catch(e) { showError('create-error', e.message); }
+  setLoading('create-btn', false);
+}
+
+async function doAddSuite() {
+  const text = v('suite-para');
+  if (!text) { showError('suite-error','Écrivez un paragraphe.'); return; }
+  setLoading('suite-btn', true);
+  try {
+    const story = await api('POST', `/stories/${currentStoryId}/paragraphs`, { text });
+    closeModal('modal-suite');
+    document.getElementById('suite-para').value = '';
+    toast('Suite ajoutée ! ✍️');
+    renderStory(story);
+  } catch(e) { showError('suite-error', e.message); }
+  setLoading('suite-btn', false);
+}
+
+async function doAddBranch() {
+  const text = v('branch-para');
+  if (!text) { showError('branch-error','Écrivez un paragraphe.'); return; }
+  setLoading('branch-btn', true);
+  try {
+    const story = await api('POST', `/stories/${currentStoryId}/branches`, { text });
+    closeModal('modal-branch');
+    document.getElementById('branch-para').value = '';
+    toast('Embranchement créé ! 🌿');
+    renderStory(story);
+  } catch(e) { showError('branch-error', e.message); }
+  setLoading('branch-btn', false);
+}
+
+async function toggleLike() {
+  if (!currentUser) { openModal('modal-login'); return; }
+  try {
+    const r = await api('POST', `/stories/${currentStoryId}/like`);
+    document.getElementById('like-btn').className = 'like-btn' + (r.liked ? ' liked' : '');
+    document.getElementById('like-btn').innerHTML = `♥ <span id="like-count">${r.likes}</span>`;
+  } catch(e) { toast(e.message); }
+}
+
+async function toggleFollow() {
+  if (!currentUser) { openModal('modal-login'); return; }
+  try {
+    const r = await api('POST', `/stories/${currentStoryId}/follow`);
+    document.getElementById('follow-btn').className = 'follow-btn' + (r.following ? ' following' : '');
+    document.getElementById('follow-btn').innerHTML = `${r.following?'🔕':'🔔'} <span id="follow-count">${r.followers}</span>`;
+    toast(r.following ? 'Vous suivez cette histoire 🔔' : 'Vous ne suivez plus cette histoire');
+  } catch(e) { toast(e.message); }
+}
+
+// ════════════════════════════════
+//  ADMIN
+// ════════════════════════════════
+async function loadAdmin() {
+  try {
+    const [stats, users, stories] = await Promise.all([
+      api('GET', '/stories/admin/stats'),
+      api('GET', '/admin/users'),
+      api('GET', '/stories'),
+    ]);
+    document.getElementById('stat-users').textContent      = stats.users;
+    document.getElementById('stat-stories').textContent    = stats.stories;
+    document.getElementById('stat-paragraphs').textContent = stats.paragraphs;
+    document.getElementById('stat-likes').textContent      = stats.likes;
+
+    document.getElementById('admin-users-tbody').innerHTML = users.map(u => `
+      <tr>
+        <td><b>${esc(u.pseudo)}</b>${u.pseudo===currentUser?.pseudo?' (vous)':''}</td>
+        <td><span class="badge badge-${u.isAdmin?'admin':'user'}">${u.isAdmin?'Admin':'Utilisateur'}</span></td>
+        <td>${u.storiesCount}</td>
+        <td class="td-actions">
+          ${!u.isAdmin && u.pseudo!==currentUser?.pseudo ? `<button class="btn btn-ink btn-sm" onclick="adminAction('promote','${esc(u.pseudo)}')">⬆ Promouvoir</button>` : ''}
+          ${u.isAdmin && u.pseudo!==currentUser?.pseudo  ? `<button class="btn btn-ink btn-sm" onclick="adminAction('demote','${esc(u.pseudo)}')">⬇ Rétrograder</button>` : ''}
+          ${u.pseudo!==currentUser?.pseudo ? `<button class="btn btn-danger btn-sm" onclick="adminAction('deleteUser','${esc(u.pseudo)}')">🗑 Supprimer</button>` : ''}
+        </td>
+      </tr>`).join('');
+
+    document.getElementById('admin-stories-tbody').innerHTML = stories.map(s => `
+      <tr>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(s.title)}">${esc(s.title)}</td>
+        <td>${esc(s.cat)}</td>
+        <td><span class="badge" style="background:${s.closed?'#fee2e2':'#d1fae5'};color:${s.closed?'#dc2626':'#065f46'}">${s.closed?'Fermée':'Active'}</span></td>
+        <td>${s.likes.length}</td>
+        <td class="td-actions">
+          <button class="btn btn-ink btn-sm" onclick="adminAction('toggleClose','${s._id}')">${s.closed?'🔓 Ouvrir':'🔒 Fermer'}</button>
+          <button class="btn btn-danger btn-sm" onclick="adminAction('deleteStory','${s._id}')">🗑 Supprimer</button>
+        </td>
+      </tr>`).join('');
+  } catch(e) { toast('Erreur admin : ' + e.message); }
+}
+
+async function adminAction(action, id) {
+  try {
+    if (action === 'promote')      { await api('PATCH', `/admin/users/${id}/promote`); toast(`${id} est maintenant admin.`); }
+    if (action === 'demote')       { await api('PATCH', `/admin/users/${id}/demote`);  toast(`${id} rétrogradé.`); }
+    if (action === 'deleteUser')   { if (!confirm(`Supprimer "${id}" ?`)) return; await api('DELETE', `/admin/users/${id}`); toast(`Compte "${id}" supprimé.`); }
+    if (action === 'toggleClose')  { const r = await api('PATCH', `/stories/${id}/close`); toast(r.closed ? 'Histoire fermée.' : 'Histoire réouverte.'); }
+    if (action === 'deleteStory')  { if (!confirm('Supprimer cette histoire ?')) return; await api('DELETE', `/stories/${id}`); toast('Histoire supprimée.'); }
+    loadAdmin();
+  } catch(e) { toast(e.message); }
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('admin-tab-users').classList.toggle('hidden', tab !== 'users');
+  document.getElementById('admin-tab-stories').classList.toggle('hidden', tab !== 'stories');
+}
+
+// ════════════════════════════════
+//  UTILS
+// ════════════════════════════════
+function v(id) { return document.getElementById(id).value.trim(); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function setLoading(id, on) { const b = document.getElementById(id); if(b){ b.disabled = on; b.textContent = on ? 'En cours…' : b.dataset.label || b.textContent; } }
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ════════════════════════════════
+//  INIT — vérifier session existante
+// ════════════════════════════════
+(async () => {
+  try { currentUser = await api('GET', '/auth/me'); } catch(e) { currentUser = null; }
+  updateNavbar();
+  loadStories();
+})();
+</script>
+</body>
+</html>
